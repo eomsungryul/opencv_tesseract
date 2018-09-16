@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="bcaExceptionLog">
+	
+	<sql id="WhereQuery">
+	WHERE 1=1
+		<if test="value!='' and value!=null">
+			AND BCA_MODEL_CD = ${ value }
+		</if>	
+	</sql>
+    
+    <select id="select" parameterType="String" resultType="hashMap">
+    	SELECT 
+    		b.BCA_MODEL_CD , 
+    		b.BCA_CATEGORY_CODE , 
+    		b.BCA_ATTR_CODE , 
+    		b.ATTR_ORDER , 
+    		c.CODE_VALUE
+    	FROM
+    	(SELECT * FROM BCA_ITEM_ATTR
+		<include refid="bcaItemAttr.WhereQuery"></include>
+		) b, COMMON_CODE c
+		WHERE 1=1 
+		AND b.BCA_ATTR_CODE = c.code
+    </select>
+    
+    
+    <insert id="insert" parameterType="com.tessModule.tess.cmmn.service.StatusLogVO">
+    	<selectKey resultType="INTEGER" keyProperty="logId" order="BEFORE">
+            SELECT COALESCE(MAX(LOG_ID)+1,0) FROM BCA_EXCEPTION_LOG
+        </selectKey>
+    	INSERT INTO BCA_EXCEPTION_LOG (
+        	LOG_ID , 
+        	EXCEPTION_MESSEAGE , 
+        	EXCEPTION_CODE , 
+        	EXCTPTION_ERRORS , 
+	        INSERT_DT,
+	        REQUEST_METHOD,
+	        REQUEST_URI,
+	        REQUEST_BODY
+	        )
+        VALUES
+        	(
+        	#{ logId },
+        	#{ exceptionMesseage },
+        	#{ exceptionCode },
+        	#{ exceptionErrors },
+        	NOW(),
+        	#{ requestMethod },
+        	#{ requestUri },
+        	#{ requestBody } 
+        	)
+    </insert>
+    
+    <update id="update" parameterType="hashMap">
+    	update BCA_CONVERT set
+	        CONVERT_STATUS = #{ convertStatus } 
+    	where CONVERT_ID = #{ convertId }
+    </update>
+	
+</mapper>

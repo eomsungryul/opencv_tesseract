@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="orderwait.cmmn.service.impl.AttachFileMapper">
+		
+	<select id="select" parameterType="hashmap" resultType="egovMap">
+		select
+        	attach_id , 
+            file_seq , 
+	        file_nm,
+	        file_path,
+	        file_size,
+	        reg_dttm            
+        from attach_file 
+        where attach_id = #{ attachId }
+        and file_seq = #{ fileSeq }
+	</select>
+	
+	<insert id="insert" parameterType="hashmap">
+        insert into attach_file (
+        	attach_id , 
+            file_seq , 
+	        file_nm,
+	        file_path,
+	        file_size
+	        )
+        values
+        	(#{ seq },
+        	'1',
+        	#{ fileNm },
+        	#{ filePath },
+        	#{ fileSize })
+	</insert>
+	
+	<delete id="delete" parameterType="egovMap">
+		delete from attach_file where 
+         attach_id = #{ seq } 
+	</delete>
+	
+</mapper>

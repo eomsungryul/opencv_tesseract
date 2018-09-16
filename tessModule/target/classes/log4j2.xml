@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+	<Appenders>
+		<Console name="console" target="SYSTEM_OUT">
+			<PatternLayout pattern="%d %5p [%c] %m%n" />
+		</Console>
+		<RollingFile name="rollingFile" fileName="C:/logs/cleanroad.log"
+			filePattern="C:/logs/cleanroad.log.%d{yyyy-MM-dd}-%i"
+			append="true">
+			<PatternLayout pattern="%d %5p [%c] %m%n" />
+			<Policies>
+				<TimeBasedTriggeringPolicy interval="1" modulate="true" />
+			</Policies>
+		</RollingFile>
+	</Appenders>
+
+	<Loggers>
+		<Logger name="java.sql" level="DEBUG" additivity="false">
+			<AppenderRef ref="console" />
+			<AppenderRef ref="rollingFile" />
+		</Logger>
+		
+		<Logger name="jdbc.sqlonly" level="DEBUG" additivity="false">
+	        <AppenderRef ref="console" />
+			<AppenderRef ref="rollingFile" />
+	    </Logger>
+	    
+	    <Logger name="jdbc.resultset" level="DEBUG" additivity="false">
+	        <AppenderRef ref="console" />
+			<AppenderRef ref="rollingFile" />
+	    </Logger>
+    
+		<Logger name="egovframework" level="DEBUG" additivity="false">
+			<AppenderRef ref="console" />
+			<AppenderRef ref="rollingFile" />
+		</Logger>
+		<!-- log SQL with timing DEBUGrmation, post execution -->
+		<Logger name="jdbc.sqltiming" level="DEBUG" additivity="false">
+			<AppenderRef ref="console" />
+			<AppenderRef ref="rollingFile" />
+		</Logger>
+		<Logger name="org.springframework" level="DEBUG" additivity="false">
+			<AppenderRef ref="console" />
+			<AppenderRef ref="rollingFile" />
+		</Logger>
+		<Logger name="org.springframework.jdbc" level="DEBUG" additivity="false">
+			<AppenderRef ref="console" />
+			<AppenderRef ref="rollingFile" />
+		</Logger>
+		
+		<Root level="WARN">
+			<AppenderRef ref="console" />
+			<AppenderRef ref="rollingFile" />
+		</Root>
+	</Loggers>
+</Configuration>

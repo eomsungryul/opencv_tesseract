@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="convert">
+	
+	<sql id="WhereQuery">
+	WHERE 1=1
+		<if test="convert_id!='' and convert_id!=null">
+			AND CONVERT_ID = ${ convert_id }
+		</if>	
+		<if test="convert_status!='' and convert_status!=null">
+			AND CONVERT_STATUS = ${ convert_status }
+		</if>	
+		<!-- <if test="searchCondition=='regId' and searchKeyword!='' and searchKeyword!=null">
+			AND REG_ID IN (SELECT USER_ID FROM T_USER WHERE USER_NAME LIKE '%'||#{ searchKeyword }||'%')
+		</if> -->	
+	</sql>
+    
+    <select id="select" parameterType="com.tessModule.tess.convert.vo.Convert" resultType="com.tessModule.tess.convert.vo.Convert">
+    	SELECT * FROM BCA_CONVERT
+		<include refid="convert.WhereQuery"></include>
+    </select>
+    
+    
+    <insert id="insert" parameterType="com.tessModule.tess.convert.vo.Convert">
+    	<selectKey resultType="INTEGER" keyProperty="convertId" order="BEFORE">
+            SELECT COALESCE(MAX(CONVERT_ID)+1,0) FROM BCA_CONVERT
+        </selectKey>
+    	INSERT INTO BCA_CONVERT (
+        	CONVERT_ID , 
+        	USER_ID , 
+        	GYM_ID , 
+        	INPUT_FILE_LOCATION , 
+	        CONVERT_STATUS,
+	        CONVERT_STATUS_PROCESS_DT
+	        )
+        VALUES
+        	(#{ convertId },
+        	#{ user_id },
+        	#{ gym_id },
+        	#{ input_file_location },
+        	'0',
+        	NOW())
+    </insert>
+    
+    <update id="update" parameterType="com.tessModule.tess.convert.vo.Convert">
+    	update BCA_CONVERT set
+        	USER_ID = #{ user_id } , 
+        	GYM_ID  = #{ gym_id } , 
+        	INPUT_FILE_LOCATION  = #{ input_file_location } , 
+	        CONVERT_STATUS = #{ convert_status } ,
+	        CONVERT_STATUS_PROCESS_DT = #{ convert_status_process_dt } ,
+	        CONVERT_STATUS = #{ convert_status } 
+    	where CONVERT_ID = #{ convert_id }
+    </update>
+	
+</mapper>

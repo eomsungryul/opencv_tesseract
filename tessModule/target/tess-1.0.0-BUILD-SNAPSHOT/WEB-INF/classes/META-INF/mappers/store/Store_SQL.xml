@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="orderwait.storeBoard.service.impl.StoreMapper">
+		 	
+	<resultMap id="storeMap" type="egovMap">
+		<result property="seq" column="seq" jdbcType="INTEGER" />
+		<result property="storeNm" column="store_nm" jdbcType="VARCHAR" />
+		<result property="storeCode" column="store_code" jdbcType="VARCHAR" />
+		<result property="programNm" column="program_nm" javaType="java.lang.String" jdbcType="VARCHAR" /> 
+		<result property="comment" column="comment" jdbcType="VARCHAR" />
+		<result property="bellYn" column="bell_yn" jdbcType="VARCHAR" />
+		<result property="kioskYn" column="kiosk_yn" jdbcType="VARCHAR" />
+		<result property="downloadFile" column="DOWNLOAD_FILE" jdbcType="VARCHAR" />
+	</resultMap>
+    
+	
+	<sql id="WhereQuery">
+	WHERE 1=1
+		<if test="searchCondition=='title' and searchKeyword!='' and searchKeyword!=null">
+			AND store_nm LIKE CONCAT('%',#{ searchKeyword },'%')
+		</if>	
+		<if test="searchCondition=='regId' and searchKeyword!='' and searchKeyword!=null">
+			AND REG_ID IN (SELECT USER_ID FROM T_USER WHERE USER_NAME LIKE '%'||#{ searchKeyword }||'%')
+		</if>	
+	</sql>
+    
+    <select id="selectList" parameterType="searchVO" resultType="egovMap">
+    	SELECT * FROM (
+        SELECT @rownum := @rownum+1 AS RN, A.* FROM (
+        	SELECT   seq
+	          ,      store_nm
+	          ,      store_code
+	          ,      program_nm
+	          ,      comment
+        	  , 	(SELECT file_path FROM ATTACH_FILE X WHERE X.attach_id = A.seq) AS DOWNLOAD_FILE   
+	          ,      bell_yn
+	          ,      kiosk_yn
+          FROM (SELECT seq, store_nm, store_code, program_nm, comment, bell_yn, kiosk_yn FROM link_store WHERE store_code = #{ searchGroup } ) A,(SELECT @rownum := 0) ROW
+          <include refid="orderwait.storeBoard.service.impl.StoreMapper.WhereQuery" />
+        ) A ) A
+        WHERE RN BETWEEN #{ firstIndex }+1 and (#{ firstIndex }+#{ recordCountPerPage }) 
+    </select>
+    
+      <select id="selectListCnt" parameterType="searchVO" resultType="Integer">
+        SELECT COUNT(*)        
+        FROM (SELECT seq, store_nm, store_code, program_nm, comment, bell_yn, kiosk_yn FROM link_store WHERE store_code = #{ searchGroup } ) A
+		<include refid="orderwait.storeBoard.service.impl.StoreMapper.WhereQuery" />
+    </select>
+	     
+    <!-- 게시판 단일 -->
+    <select id="detail" parameterType="hashmap" resultMap="storeMap">
+        SELECT
+        	seq, store_nm, store_code, program_nm, comment, bell_yn, kiosk_yn
+        	, (SELECT file_path FROM ATTACH_FILE X WHERE X.attach_id = a.seq) AS DOWNLOAD_FILE   
+        	 FROM link_store a
+        WHERE 1=1
+        AND seq = #{ seq }
+    </select>
+    
+    <insert id="insert" parameterType="hashmap" >
+    	<selectKey resultType="String" keyProperty="boardSeq" order="BEFORE">
+            select nvl(max(to_number(board_seq)),0)+1 as max_seq from link_store where board_type = #{ boardType }
+        </selectKey>
+        insert into link_store (
+	        BOARD_TYPE,
+	        BOARD_SEQ,
+	        TITLE,
+	        CONTENT,
+			<if test="parentBoardSeq!='' and parentBoardSeq!=null">
+	        PARENlink_store_SEQ,
+        	</if>
+	        REG_ID,
+	        REG_DATE,
+	        USE_YN
+	        )
+        values
+        	(#{ boardType },
+        	#{ boardSeq },
+        	#{ title },
+        	#{ content },
+			<if test="parentBoardSeq!='' and parentBoardSeq!=null">
+        	#{ parentBoardSeq },
+        	</if>
+        	#{ regId },
+        	sysdate,
+        	#{ useYn })  
+    </insert>
+        
+    <update id="update" parameterType="hashmap">
+        update link_store
+        set
+            program_nm = #{ programNm },
+            comment = #{ comment },
+            bell_yn = #{ bellYn },
+            kiosk_yn = #{ kioskYn }
+        where
+            seq = #{ seq } 
+    </update>
+        
+    <delete id="delete" parameterType="hashmap">
+         delete from link_store where 
+            board_type = #{ boardType } 
+            and board_seq = #{ boardSeq } 
+    </delete>
+	
+</mapper>

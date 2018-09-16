@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="code">
+
+	<sql id="body">
+		select * from 
+	</sql>
+	
+	<sql id="WhereQuery">
+	WHERE 1=1
+		<if test="searchCondition=='title' and searchKeyword!='' and searchKeyword!=null">
+			AND store_nm LIKE CONCAT('%',#{ searchKeyword },'%')
+		</if>	
+		<if test="searchCondition=='regId' and searchKeyword!='' and searchKeyword!=null">
+			AND REG_ID IN (SELECT USER_ID FROM T_USER WHERE USER_NAME LIKE '%'||#{ searchKeyword }||'%')
+		</if>	
+	</sql>
+    
+    <select id="select" parameterType="String" resultType="hashMap">
+    	SELECT * FROM common_code
+<!--         WHERE code_category like '%'||#{ searchKeyword }||'%' -->
+        WHERE code_category = #{apikey}
+    </select>
+	
+</mapper>
